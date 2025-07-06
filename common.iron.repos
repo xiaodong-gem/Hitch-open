@@ -12,10 +12,6 @@ repositories:
         type: git
         url: git@github.com:airacingtech/autoware.core.git
         version: art-iron
-    src/external/autoware/core/autoware_adapi_msgs:
-        type: git
-        url: git@github.com:airacingtech/autoware_adapi_msgs.git
-        version: art-iron
     src/external/autoware/core/external/autoware_auto_msgs:
         type: git
         url: git@github.com:airacingtech/autoware_auto_msgs.git
@@ -24,28 +20,4 @@ repositories:
         type: git
         url: git@github.com:airacingtech/autoware.universe.git
         version: art-iron
-    src/external/autoware/universe/external/tier4_autoware_msgs:
-        type: git
-        url: git@github.com:airacingtech/tier4_autoware_msgs.git
-        version: art-iron
-    # Autoware Dependencies
-    src/external/autoware/universe/external/muSSP:
-        type: git
-        url: git@github.com:airacingtech/muSSP.git
-        version: art-iron
-    src/external/autoware/universe/external/ndt_omp:
-        type: git
-        url: git@github.com:airacingtech/ndt_omp.git
-        version: tier4/main
-    src/external/autoware/universe/external/proxsuite:
-        type: git
-        url: git@github.com:airacingtech/proxsuite.git
-        version: art-iron
-    src/external/utils/message_filters:
-        type: git
-        url: git@github.com:airacingtech/message_filters.git
-        version: art-iron
-    src/external/interfaces/robot_localization:
-        type: git
-        url: git@github.com:airacingtech/robot_localization.git
-        version: art-iron
+

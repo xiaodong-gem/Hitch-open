@@ -1,5 +1,0 @@
-repositories:
-    src/external/interfaces/lgsvl_bridge:
-        type: git
-        url: git@github.com:airacingtech/ros2-lgsvl-bridge.git
-        version: art-iron

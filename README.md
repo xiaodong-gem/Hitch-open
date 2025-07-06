@@ -21,40 +21,30 @@ This repository contains the autonomous driving system developed for the HitchOp
 ### Installation
 We will assume you have ROS2 Iron installed and sourced in all these terminals.
 
-1. Clone `HitchOpen-LGSVL` and install `python3-vcstool`:
+1. Fork `HitchOpen-LGSVL` and name your fork as desired. Then clone your fork and navigate to the repository root:
+   ```
+   git clone YOUR_REPO_GITHUB_PATH
+   cd YOUR_REPO_NAME
+   ```
+
+2. Install `python3-vcstool`:
    ```bash
-   git clone git@github.com:intelligentracing/HitchOpen-LGSVL.git
    sudo apt update
    sudo apt install python3-vcstool
    ```
 
-2. Import dependencies:
+3. Import dependencies:
    ```bash
-   cd HitchOpen-LGSVL
    make vcs-import VCS_FILE=common.iron.repos
-   make vcs-import VCS_FILE=svl.iron.repos # if working on SVL simulator
    ```
 
-3. Install dependencies. In general if you run a VCS step post this then you need to rerun the `make rosdep-install` command:
+4. Install dependencies. In general if you run a VCS step post this then you need to rerun the `make rosdep-install` command:
    ```bash
    make rosdep-install-eol
    pip3 install environs
    ```
 
-<!-- 4. Install casadi:
-   ```bash
-   source /opt/ros/iron/setup.bash
-   sudo apt install -y gcc g++ gfortran git cmake liblapack-dev pkg-config --install-recommends
-   sudo apt install -y -no-install-recommends coinor-libipopt-dev libslicot-dev
-   cd ~/ && git clone https://github.com/casadi/casadi.git -b master
-   cd casadi && mkdir build && cd build
-   cmake -DWITH_IPOPT=ON -DWITH_SLICOT=ON -DWITH_QPOASES=ON -DWITH_OSQP=ON ... && make
-   sudo make install
-   echo export LD_LIBRARY_PATH="$(LD_LIBRARY_PATH):$(LD_LIBRARY_PATH):/usr/local/lib" >> ~/.bashrc
-   source ~/.bashrc
-   ``` -->
-
-4. Build up the stack:
+5. Build up the stack:
    ```bash
    make svl 
    ```
@@ -104,9 +94,6 @@ enum TtlColumn
   TARGET_SPEED = 4, # Mile per hour
 };
 ```
-
-#### Key Algorithms:
-- `Race Path Planner*`: Generates optimal racing lines considering track boundaries and geometry and vehicle dynamics constraints.
 
 
 ## Control
@@ -186,7 +173,7 @@ Please source all the terminals properly. Please make sure your ports are not ma
    ```bash
    python3 src/launch/svl_launch/scripts/launch_ossdc.py --env svl.env
    ```
-   Note: Map, sensors, and other configurations can be modified in `race.env`. Spawn location can be modified in `uuids.json`
+   Note: Map, sensors, and other configurations can be modified in `race.env`. Spawn location and initial speed can be modified in `uuids.json`
 
 
 5. Launch urdf if needed(in Pilot Terminal):
@@ -204,16 +191,14 @@ Please source all the terminals properly. Please make sure your ports are not ma
    float32 target_wheel_angle  # radians
    float32 target_wheel_angular_rate  # radians / second
    uint8 target_gear
-
-   # target_gear from 0-6, 0 is neutral, 1-6 is forward gear
    ```
 
-7. Alternatively, keynoard_controller is provided to explore the maps and collect waypoints. You can use `WASD` to maunally control the vehicle in the simulator (in ART Pilot Terminal):
+7. Alternatively, keynoard_controller is provided to explore the maps and collect waypoints. You can use `WASD` to maunally control the vehicle in the simulator (in Pilot Terminal):
    ```
    ros2 run keyboard_controller keyboard_control
    ```
 
-8. You can also run our sample stack (in ART Pilot Terminal):
+8. You can also run our sample stack (in Pilot Terminal):
    ```bash
    ros2 launch simple_racing simple_racing.launch.py params_file:=src/launch/simple_racing/params/simple_racing.yml
    ```
@@ -222,7 +207,12 @@ Please source all the terminals properly. Please make sure your ports are not ma
 
 The simulation environment provides a comprehensive race competition system with integrated timing and flag control. This allows for realistic race scenario testing and evaluation.
 
-1. Competition timer (Please do not modify anything in competition_timer for your final submission)
+1. To ensure fairness in the simulation competition, we ask all the teams NOT to modify the following modules:
+   - All packages under `src/external/autoware`
+   - `svl_launch`
+   - `competition_timer`
+
+2. Competition timer (Please do not modify anything in competition_timer for your final submission)
    - Keeps track of the laps number and clocks the time. 
    - Configuration options:
       - Map is set in `race.env`
@@ -233,7 +223,8 @@ The simulation environment provides a comprehensive race competition system with
       ```bash
       ros2 launch competition_timer competition_timer.launch.py use_sim_time:=true
       ```
-2. Flags
+      
+3. Flags
    - The competition timer publishes VehicleFlag on the `/vehicle_flag` topic
    - Flags in the competition:
      - GREEN: Competition is active, vehicles can go
@@ -246,9 +237,12 @@ The simulation environment provides a comprehensive race competition system with
    - Vehicles MUST subscribe to `/vehicle_flag` topic and respond to flag states. If no flag is received, vehicle must assume RED flag.
    - Black flag is published upon the completion of the target laps or early termination. You do not need to respond to it in the simulation now, but please try to make sure your vehicles can stop safely after finishing the competition.
 
-3. Competition States
+4. Competition States
    - Inactive: Simulation Competition is launched with deault RED flag. Vechiles are not allowed to move.
    - Start: Competition begins with GREEN flag. Timer starts. 
    - Pause: Red flag might be published during the competition due to safety reasons and abnormal vehicle behavior. Timer does not pasue.
    - End: Vehicles have finished the target_laps or BLACK flag is published early to stop the competition.
 
+5. Submission
+   - Your submission MUST be a fork of the official competition repository.
+   - When submitting your competition result, please ensure your team updates the instructions clearly in your fork’s GitHub README. Otherwise, we will execute and evaluate your submission with the default setting provided in the official repository. 

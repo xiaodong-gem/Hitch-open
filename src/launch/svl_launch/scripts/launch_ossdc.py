@@ -64,6 +64,10 @@ print(f"Map {MAP_NAME} with UUID {map_info['UUID']} loaded")
 base_start_pos = map_info["BASE_START_POSE"]
 dist_offset = -10
 
+# Get initial velocity from config
+INITIAL_VELOCITY = uuids.get("INITIAL_VELOCITY")
+ANGULAR_VELOCITY = uuids.get("ANGULAR_VELOCITY")
+
 egos = []
 for idx in range(NUM_CARS):
     s = lgsvl.AgentState()
@@ -74,6 +78,8 @@ for idx in range(NUM_CARS):
     s.rotation.x = base_start_pos[3]
     s.rotation.y = base_start_pos[4]
     s.rotation.z = base_start_pos[5]
+    s.velocity = lgsvl.Vector(INITIAL_VELOCITY[0], INITIAL_VELOCITY[1], INITIAL_VELOCITY[2])
+    s.angular_velocity = lgsvl.Vector(ANGULAR_VELOCITY[0], ANGULAR_VELOCITY[1], ANGULAR_VELOCITY[2])
     # get sensor UUID
     sensor_uuid = uuids["SENSORS"].get(SENSORS[idx % len(SENSORS)], None)
     if sensor_uuid is None:

@@ -99,9 +99,6 @@ target_fs/
 *.ipynb_checkpoints/
 
 
-## VCS files
-src/external/**
-
 ## Frames
 *.gv
 *.pdf
