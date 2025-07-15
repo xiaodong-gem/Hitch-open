@@ -1,7 +1,8 @@
 from launch import LaunchDescription
 from launch_ros.actions import Node
-from launch.actions import DeclareLaunchArgument
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.substitutions import LaunchConfiguration, TextSubstitution
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 from ament_index_python.packages import get_package_share_directory
 import os
 from environs import Env
@@ -37,7 +38,22 @@ def generate_launch_description():
         }]
     )
 
-    return LaunchDescription([
+    # Include misc.launch.py
+    misc_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([
+            os.path.join(get_package_share_directory('autonomy_launch'), 'launch', 'misc.launch.py')
+        ])
+    )
 
+    # Include lgsvl_interface.launch.py
+    lgsvl_interface_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([
+            os.path.join(get_package_share_directory('lgsvl_interface'), 'launch', 'lgsvl_interface.launch.py')
+        ])
+    )
+
+    return LaunchDescription([
+        misc_launch,
+        lgsvl_interface_launch,
         timer_node
     ]) 

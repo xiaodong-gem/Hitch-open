@@ -211,6 +211,7 @@ The simulation environment provides a comprehensive race competition system with
    - All packages under `src/external/autoware`
    - `svl_launch`
    - `competition_timer`
+   - `race.env`
 
 2. Competition timer (Please do not modify anything in competition_timer for your final submission)
    - Keeps track of the laps number and clocks the time. 
@@ -223,6 +224,7 @@ The simulation environment provides a comprehensive race competition system with
       ```bash
       ros2 launch competition_timer competition_timer.launch.py use_sim_time:=true
       ```
+      - This will also launch misc and lgsvl interface. 
       
 3. Flags
    - The competition timer publishes VehicleFlag on the `/vehicle_flag` topic
@@ -230,6 +232,7 @@ The simulation environment provides a comprehensive race competition system with
      - GREEN: Competition is active, vehicles can go
      - RED: Vehicle must stop
      - BLACK: Competition ends
+     - G10, G20, G40, G60, G80, G100: Green flags with corresponding speed limit
    - The competition is started by manually setting the flag to green:
       ```bash
       ros2 param set /competition_timer_node vehicle_flag green

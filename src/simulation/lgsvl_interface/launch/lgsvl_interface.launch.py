@@ -87,9 +87,9 @@ def generate_launch_description():
                     lgsvl_interface_param,
                     use_sim_time,
                     {
-                        "origin.latitude": LaunchConfiguration("origin_lat"),
-                        "origin.longitude": LaunchConfiguration("origin_lon"),
-                        "origin.altitude": LaunchConfiguration("origin_alt"),
+                        "origin.latitude": env.float("GPS_ORIGIN_LAT"),
+                        "origin.longitude": env.float("GPS_ORIGIN_LON"),
+                        "origin.altitude": env.float("GPS_ORIGIN_ALT"),
                         "num_pointclouds": num_lidars,
                         "num_cameras": num_cameras,
                     },

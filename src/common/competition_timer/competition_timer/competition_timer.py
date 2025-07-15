@@ -38,13 +38,25 @@ class CompetitionTimerNode(Node):
         self._flag_map = {
             'green': VehicleFlag.GREEN,
             'red': VehicleFlag.RED,
-            'black': VehicleFlag.BLACK
+            'black': VehicleFlag.BLACK,
+            'g10': VehicleFlag.G10,
+            'g20': VehicleFlag.G20,
+            'g40': VehicleFlag.G40,
+            'g60': VehicleFlag.G60,
+            'g80': VehicleFlag.G80,
+            'g100': VehicleFlag.G100
         }
         # Reverse mapping for logging
         self._flag_to_string = {
             VehicleFlag.GREEN: 'GREEN',
             VehicleFlag.RED: 'RED',
-            VehicleFlag.BLACK: 'BLACK'
+            VehicleFlag.BLACK: 'BLACK',
+            VehicleFlag.G10: 'G10',
+            VehicleFlag.G20: 'G20',
+            VehicleFlag.G40: 'G40',
+            VehicleFlag.G60: 'G60',
+            VehicleFlag.G80: 'G80',
+            VehicleFlag.G100: 'G100'
         }
         self.vehicle_flag = self._flag_map.get(self.get_parameter('vehicle_flag').value.lower(), VehicleFlag.RED)
         self.get_logger().info(f'Vehicle flag set to: {self._flag_to_string[self.vehicle_flag]}')
@@ -147,7 +159,13 @@ class CompetitionTimerNode(Node):
         self.vehicle_flag_publisher.publish(msg)
         
         # Handle competition state changes based on vehicle flag
-        is_competition_active = (self.vehicle_flag == VehicleFlag.GREEN)
+        is_competition_active = (self.vehicle_flag == VehicleFlag.GREEN or 
+                               self.vehicle_flag == VehicleFlag.G10 or
+                               self.vehicle_flag == VehicleFlag.G20 or
+                               self.vehicle_flag == VehicleFlag.G40 or
+                               self.vehicle_flag == VehicleFlag.G60 or
+                               self.vehicle_flag == VehicleFlag.G80 or
+                               self.vehicle_flag == VehicleFlag.G100)
 
         if is_competition_active and not self.competition_active:
             # Competition just started

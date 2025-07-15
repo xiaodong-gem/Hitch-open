@@ -71,7 +71,13 @@ class KeyboardControlNode(Node):
         self._flag_to_string = {
             VehicleFlag.GREEN: 'GREEN',
             VehicleFlag.RED: 'RED',
-            VehicleFlag.BLACK: 'BLACK'
+            VehicleFlag.BLACK: 'BLACK',
+            VehicleFlag.G10: 'G10',
+            VehicleFlag.G20: 'G20',
+            VehicleFlag.G40: 'G40',
+            VehicleFlag.G60: 'G60',
+            VehicleFlag.G80: 'G80',
+            VehicleFlag.G100: 'G100'
         }
         
         # Control parameters
@@ -97,11 +103,11 @@ class KeyboardControlNode(Node):
         if self.save_waypoints_enabled:
             self.get_logger().info(f"Waypoints will be saved to: {self.output_dir}")
         self.get_logger().info("Controls:")
-        self.get_logger().info("W: Accelerate (only works with GREEN flag)")
+        self.get_logger().info("W: Accelerate (only works with GREEN flags: GREEN, G10, G20, G40, G60, G80, G100)")
         self.get_logger().info("S: Brake")
         self.get_logger().info("A/D: Steer Left/Right")
-        self.get_logger().info("↑: Shift up gear")
-        self.get_logger().info("↓: Shift down gear")
+        self.get_logger().info("↑: Shift up gear (only works with GREEN flags)")
+        self.get_logger().info("↓: Shift down gear (only works with GREEN flags)")
         self.get_logger().info("Space: Record waypoint")
         self.get_logger().info("O: Save waypoints")
         self.get_logger().info("Q: Quit")
@@ -205,15 +211,24 @@ class KeyboardControlNode(Node):
     def on_press(self, key):
         try:
             if key.char == 'w':
-                self.throttle = min(1.0, self.throttle + self.throttle_step)
-                self.brake = 0.0
+                if (self.vehicle_flag == VehicleFlag.GREEN or 
+                    self.vehicle_flag == VehicleFlag.G10 or
+                    self.vehicle_flag == VehicleFlag.G20 or
+                    self.vehicle_flag == VehicleFlag.G40 or
+                    self.vehicle_flag == VehicleFlag.G60 or
+                    self.vehicle_flag == VehicleFlag.G80 or
+                    self.vehicle_flag == VehicleFlag.G100):
+                    self.throttle = min(1.0, self.throttle + self.throttle_step)
+                    self.brake = 0.0
+                else:
+                    self.get_logger().warn(f'Cannot accelerate: Flag is {self._flag_to_string[self.vehicle_flag]}')
             elif key.char == 's':
                 self.brake = min(1.0, self.brake + self.brake_step)
                 self.throttle = 0.0
             elif key.char == 'a':
-                    self.steering = min(self.max_steering, self.steering - self.steering_step)
+                self.steering = min(self.max_steering, self.steering - self.steering_step)
             elif key.char == 'd':
-                    self.steering = max(-self.max_steering, self.steering + self.steering_step)
+                self.steering = max(-self.max_steering, self.steering + self.steering_step)
             elif key.char == 'o':
                 if self.save_waypoints_enabled:
                     self.get_logger().info('Saving waypoints...')
@@ -226,12 +241,24 @@ class KeyboardControlNode(Node):
         except AttributeError:
             # Handle special keys
             if key == keyboard.Key.up:
-                if self.vehicle_flag == VehicleFlag.GREEN:
+                if (self.vehicle_flag == VehicleFlag.GREEN or 
+                    self.vehicle_flag == VehicleFlag.G10 or
+                    self.vehicle_flag == VehicleFlag.G20 or
+                    self.vehicle_flag == VehicleFlag.G40 or
+                    self.vehicle_flag == VehicleFlag.G60 or
+                    self.vehicle_flag == VehicleFlag.G80 or
+                    self.vehicle_flag == VehicleFlag.G100):
                     self.shift_up()
                 else:
                     self.get_logger().warn(f'Cannot shift: Flag is {self._flag_to_string[self.vehicle_flag]}')
             elif key == keyboard.Key.down:
-                if self.vehicle_flag == VehicleFlag.GREEN:
+                if (self.vehicle_flag == VehicleFlag.GREEN or 
+                    self.vehicle_flag == VehicleFlag.G10 or
+                    self.vehicle_flag == VehicleFlag.G20 or
+                    self.vehicle_flag == VehicleFlag.G40 or
+                    self.vehicle_flag == VehicleFlag.G60 or
+                    self.vehicle_flag == VehicleFlag.G80 or
+                    self.vehicle_flag == VehicleFlag.G100):
                     self.shift_down()
                 else:
                     self.get_logger().warn(f'Cannot shift: Flag is {self._flag_to_string[self.vehicle_flag]}')
