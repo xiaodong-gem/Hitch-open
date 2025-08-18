@@ -11,32 +11,38 @@
     # Longitudinal control parameters (PID)
     longitudinal:
       pid:
-        kp: 0.5
-        ki: 0.1
-        kd: 0.1
-        min_throttle: 0.0
-        max_throttle: 100.0
-        max_velocity: 15.0  # m/s
+        kp: 80.0
+        ki: 0.01
+        kd: 15.0
+        min_throttle: -2.5
+        max_throttle: 3.4
+        max_velocity: 80.0 # m/s
 
     # Lateral control parameters (Pure Pursuit)
+   # Lateral control parameters (MPC)
     lateral:
-      pure_pursuit:
-        look_ahead_distance: 10.0  # meters
-        wheel_base: 2.987 # meters
+      mpc:
+        prediction_horizon: 10
+        control_horizon: 3
+        dt: 0.1
+        wheel_base: 2.987  # meters
         max_steering_angle: 0.349066  # radians (~20 degrees)
-        smoothing_factor: 0.9  # smoothing factor (0.0-1.0)
-
+        # Cost function weights
+        q_cte: 1.0      # Cross track error weight
+        q_epsi: 1.0     # Heading error weight  
+        r_delta: 0.2    # Steering effort weight
+        r_ddelta: 0.2  # Steering rate weight
 /global_planning:
   ros__parameters:
     debug: false                        # Enable/disable debug logging
-    visualize: false                    # Enable/disable visualization
+    visualize: true                    # Enable/disable visualization
     global_path_publish_rate: 1         # Rate at which global path is published (Hz)
     local_path_publish_rate: 10         # Rate at which local path is published (Hz)
-    local_path_length_m: 5.0           # Length of local path in meters # this is the next waypoint
+    local_path_length_m: 5.0         # Length of local path in meters # this is the next waypoint
     planning_odom_publish_rate: 10      # Rate at which planning odom is published (Hz)
-    csv_file_path: src/launch/simple_racing/params/LVMS_oval.csv
+    csv_file_path: src/launch/simple_racing/params/enu2.csv
 
 /autoware_lgsvl_interface:
   ros__parameters:
-    max_accel_mps2: 1.0
+    max_accel_mps2: 3.0
     max_decel_mps2: -3.0

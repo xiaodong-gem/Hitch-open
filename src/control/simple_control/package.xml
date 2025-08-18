@@ -24,7 +24,8 @@
   <depend>tf2_geometry_msgs</depend>
   <depend>lgsvl_msgs</depend>
   <depend>race_msgs</depend>
-  
+  <depend>eigen3_cmake_module</depend>
+  <depend>libeigen3-dev</depend>
   <export>
     <build_type>ament_cmake</build_type>
   </export>

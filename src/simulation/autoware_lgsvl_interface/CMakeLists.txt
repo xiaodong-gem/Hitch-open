@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD 17)
 
 # find dependencies
 find_package(ament_cmake_auto REQUIRED)
+find_package(lgsvl_msgs REQUIRED)
+find_package(autoware_auto_vehicle_msgs REQUIRED)
 
 ament_auto_find_build_dependencies(REQUIRED
   ${${PROJECT_NAME}_BUILD_DEPENDS}
@@ -31,4 +33,10 @@ ament_auto_package(INSTALL_TO_SHARE
   launch
   params
   include
+)
+ament_target_dependencies(autoware_lgsvl_interface
+  rclcpp
+  autoware_auto_vehicle_msgs
+  geometry_msgs
+  lgsvl_msgs    # <-- 新增
 )

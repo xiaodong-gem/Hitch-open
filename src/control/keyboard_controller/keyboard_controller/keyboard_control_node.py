@@ -36,7 +36,7 @@ class KeyboardControlNode(Node):
         self.flag_timeout = self.get_parameter('flag_timeout').value
         
         # Create publisher for vehicle control
-        self.publisher = self.create_publisher(VehicleControlData, '/lgsvl/control', 10)
+        self.publisher = self.create_publisher(VehicleControlData, '/lgsvl/control', 10)   
         
         # Create subscriber for GPS data
         self.gps_subscription = self.create_subscription(
@@ -83,8 +83,8 @@ class KeyboardControlNode(Node):
         # Control parameters
         self.throttle_step = 0.1
         self.brake_step = 0.1
-        self.steering_step = 0.1
-        self.max_steering = 1.0
+        self.steering_step = 0.02
+        self.max_steering = 0.15
         
         # Create timers for publishing control messages and printing GPS
         self.timer = self.create_timer(0.1, self.timer_callback)  # 10Hz for control
@@ -142,28 +142,43 @@ class KeyboardControlNode(Node):
             self.first_waypoint_recorded = True
 
     def record_waypoint(self):
-        """Record current position and orientation as waypoint"""
+
         if self.latest_gps is not None:
-            # Create waypoint tuple
-            local_x, local_y, local_z = pymap3d.geodetic2enu(self.latest_gps.latitude, self.latest_gps.longitude, self.latest_gps.altitude, self.origin_x, self.origin_y, self.origin_z)
-            waypoint = (local_x, local_y, local_z, 0.0, 0.0)
+            # 直接保存原始GPS坐标
+            waypoint = (
+                self.latest_gps.latitude,
+                self.latest_gps.longitude,
+                self.latest_gps.altitude,
+                0.0,  # 占位符1
+                0.0   # 占位符2
+            )
             self.waypoints.append(waypoint)
+            
+            # 计算ENU坐标用于日志显示（可选）
+            """ local_x, local_y, local_z = pymap3d.geodetic2enu(
+                self.latest_gps.latitude, 
+                self.latest_gps.longitude, 
+                self.latest_gps.altitude, 
+                self.origin_x, self.origin_y, self.origin_z
+            ) """
+            
             self.get_logger().info(
                 f'Recorded waypoint {len(self.waypoints)}: '
                 f'Lat: {self.latest_gps.latitude:.6f}, '
                 f'Lon: {self.latest_gps.longitude:.6f}, '
                 f'Alt: {self.latest_gps.altitude:.2f}, '
-                f'X: {waypoint[0]:.2f}, '
-                f'Y: {waypoint[1]:.2f}, '
-                f'Z: {waypoint[2]:.2f}'
-            )
+                )
+        """ f'X: {local_x:.2f}, '  # 显示ENU坐标（可选）
+        f'Y: {local_y:.2f}, '  # 显示ENU坐标（可选）
+        f'Z: {local_z:.2f}'    # 显示ENU坐标（可选 ）"""
+    
 
     def save_waypoints(self):
         if not self.waypoints:
             self.get_logger().warn('No waypoints to save')
             return
             
-        # Create filename with timestamp
+        # Create filename with timestamp           哦
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         filename = f'waypoints_{timestamp}.csv'
         
@@ -210,7 +225,7 @@ class KeyboardControlNode(Node):
 
     def on_press(self, key):
         try:
-            if key.char == 'w':
+            if key.char == '8':
                 if (self.vehicle_flag == VehicleFlag.GREEN or 
                     self.vehicle_flag == VehicleFlag.G10 or
                     self.vehicle_flag == VehicleFlag.G20 or
@@ -218,16 +233,16 @@ class KeyboardControlNode(Node):
                     self.vehicle_flag == VehicleFlag.G60 or
                     self.vehicle_flag == VehicleFlag.G80 or
                     self.vehicle_flag == VehicleFlag.G100):
-                    self.throttle = min(1.0, self.throttle + self.throttle_step)
+                    self.throttle = min(0.3, self.throttle + self.throttle_step)
                     self.brake = 0.0
                 else:
                     self.get_logger().warn(f'Cannot accelerate: Flag is {self._flag_to_string[self.vehicle_flag]}')
-            elif key.char == 's':
+            elif key.char == '5':
                 self.brake = min(1.0, self.brake + self.brake_step)
                 self.throttle = 0.0
-            elif key.char == 'a':
+            elif key.char == '4':
                 self.steering = min(self.max_steering, self.steering - self.steering_step)
-            elif key.char == 'd':
+            elif key.char == '6':
                 self.steering = max(-self.max_steering, self.steering + self.steering_step)
             elif key.char == 'o':
                 if self.save_waypoints_enabled:
@@ -262,7 +277,7 @@ class KeyboardControlNode(Node):
                     self.shift_down()
                 else:
                     self.get_logger().warn(f'Cannot shift: Flag is {self._flag_to_string[self.vehicle_flag]}')
-            elif key == keyboard.Key.space:
+            elif key == keyboard.Key.ctrl_r:
                 if self.save_waypoints_enabled:
                     self.record_waypoint()
                 else:
@@ -270,11 +285,11 @@ class KeyboardControlNode(Node):
 
     def on_release(self, key):
         try:
-            if key.char == 'w':
+            if key.char == '8':
                 self.throttle = 0.0
-            elif key.char == 's':
+            elif key.char == '5':
                 self.brake = 0.0
-            elif key.char in ['a', 'd']:
+            elif key.char in ['4', '6']:
                 self.steering = 0.0
         except AttributeError:
             pass

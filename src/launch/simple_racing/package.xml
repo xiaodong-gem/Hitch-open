@@ -16,6 +16,7 @@
   <exec_depend>global_planning</exec_depend>
   <exec_depend>simple_control</exec_depend>
   <exec_depend>autoware_lgsvl_interface</exec_depend>
+  <depend>lgsvl_msgs</depend>
 
   <export>
     <build_type>ament_cmake</build_type>

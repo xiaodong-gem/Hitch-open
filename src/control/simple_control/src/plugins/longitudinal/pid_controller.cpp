@@ -25,15 +25,21 @@ namespace control
                 ki_ = node->declare_parameter("longitudinal.pid.ki", 0.1);
                 kd_ = node->declare_parameter("longitudinal.pid.kd", 0.1);
 
-                // Get throttle limits
-                min_throttle_ = node->declare_parameter("longitudinal.pid.min_throttle", 0.0);
-                max_throttle_ = node->declare_parameter("longitudinal.pid.max_throttle", 100.0);
+                // Get acceleration limits and step sizes
+                max_accel_ = node->declare_parameter("longitudinal.pid.max_accel", 5.0);
+                max_decel_ = node->declare_parameter("longitudinal.pid.max_decel", -5.0);
+                accel_step_ = node->declare_parameter("longitudinal.pid.accel_step", 0.1);
+                decel_step_ = node->declare_parameter("longitudinal.pid.decel_step", 0.1);
 
-                max_velocity_ = node->declare_parameter("longitudinal.pid.max_velocity", 10.0);
+                max_velocity_ = node->declare_parameter("longitudinal.pid.max_velocity", 80.0);
+                
                 // Initialize error terms
                 prev_error_ = 0.0;
                 integral_error_ = 0.0;
                 last_time_ = node->now();
+                
+                // Initialize last acceleration value
+                last_accel_ = 0.0;
             }
 
             void runStep(const State::SharedPtr state,
@@ -69,16 +75,29 @@ namespace control
                     integral_error_ += error * dt;
                     double derivative_error = (error - prev_error_) / dt;
 
-                    // Calculate throttle command
-                    double throttle = kp_ * error +
-                                      ki_ * integral_error_ +
-                                      kd_ * derivative_error;
+                    // Calculate desired acceleration
+                    double desired_accel = kp_ * error +
+                                          ki_ * integral_error_ +
+                                          kd_ * derivative_error;
 
-                    // Clamp throttle to limits
-                    throttle = std::clamp(throttle, min_throttle_, max_throttle_);
-                    // RCLCPP_DEBUG_STREAM(logger_, "Throttle: " << throttle << " Target velocity: " << target_velocity << " Current velocity: " << vehicle_state->velocity);
+                    // Apply linear acceleration change
+                    if (desired_accel > last_accel_) {
+                        // Accelerating - increase acceleration gradually
+                        last_accel_ = std::min(last_accel_ + accel_step_, desired_accel);
+                        last_accel_ = std::min(last_accel_, max_accel_);
+                    } else if (desired_accel < last_accel_) {
+                        // Decelerating - decrease acceleration gradually
+                        last_accel_ = std::max(last_accel_ - decel_step_, desired_accel);
+                        last_accel_ = std::max(last_accel_, max_decel_);
+                    }
+                    
+                    // RCLCPP_DEBUG_STREAM(logger_, 
+                    //     "Target: " << target_velocity << " km/h, "
+                    //     "Current: " << vehicle_state->velocity << " km/h, "
+                    //     "Accel: " << last_accel_ << " m/s²");
+
                     // Update control command
-                    control.longitudinal.acceleration = throttle;
+                    control.longitudinal.acceleration = last_accel_;
                     control.longitudinal.is_defined_acceleration = true;
 
                     // Store error for next iteration
@@ -102,9 +121,11 @@ namespace control
             double ki_;
             double kd_;
 
-            // Throttle limits
-            double min_throttle_;
-            double max_throttle_;
+            // Acceleration parameters
+            double max_accel_;    // 最大加速度 (m/s²)
+            double max_decel_;    // 最大减速度 (m/s², 负值)
+            double accel_step_;   // 加速度变化步长 (m/s²)
+            double decel_step_;   // 减速度变化步长 (m/s²)
 
             // Error terms
             double prev_error_;
@@ -115,6 +136,9 @@ namespace control
 
             // Max velocity
             double max_velocity_;
+            
+            // Last acceleration value
+            double last_accel_;
         };
     } // namespace longitudinal
 } // namespace control
